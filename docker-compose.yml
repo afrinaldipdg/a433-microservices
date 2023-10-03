@@ -1,0 +1,31 @@
+version: '2' # Menggunakan Docker Compose versi 2
+
+services:
+  # Rincian layanan item-app
+  item-app:
+    # Menggunakan image dari GitHub Container Registry
+    image: ghcr.io/afrinaldipdg/item-app:v1
+    # Teruskan port 80 host ke port 8080 kontainer
+    ports:
+      - "80:8080"
+    # Bergantung pada layanan item-db
+    depends_on:
+      - item-db
+    # Restart selalu layanan ini jika terhenti
+    restart: always
+
+  # Rincian layanan item-db
+  item-db:
+    # Menggunakan image MongoDB versi 3
+    image: mongo:3
+    # Gunakan volume 'app-db' untuk menyimpan data
+    volumes:
+      - app-db:/data/db
+    # Restart selalu layanan ini jika terhenti
+    restart: always
+
+volumes:
+  # Definisikan volume 'app-db' untuk digunakan oleh item-db
+  app-db:
+
+
