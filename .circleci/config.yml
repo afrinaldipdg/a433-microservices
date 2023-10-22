@@ -1,0 +1,63 @@
+version: 2.1
+jobs:
+  lint-dockerfile:
+    docker:
+      - image: circleci/golang:1.16-stretch-node-browsers-legacy
+    steps:
+      - checkout
+      - run:
+          name: Install hadolint
+          command: |
+            mkdir -p ~/bin
+            curl -Lo ~/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+            chmod +x ~/bin/hadolint
+            sudo mv ~/bin/hadolint /usr/local/bin/hadolint
+      - run:
+          name: Run hadolint on Dockerfile
+          command: hadolint Dockerfile
+
+  test-app:
+    docker:
+      - image: circleci/golang:1.16-stretch-node-browsers-legacy
+    steps:
+      - checkout
+      - run:
+          name: Run unit tests
+          command: go test -v -short --count=1 $(go list ./...)
+
+  build-app-karsajobs:
+    docker:
+      - image: circleci/golang:1.16-stretch-node-browsers-legacy
+    steps:
+      - checkout
+       - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true # Ganti dengan versi Docker yang sesuai
+      - run:
+          name: Build and push Docker image
+          command: |
+            # Build your Go application
+            sudo docker build -t ghcr.io/afrinaldipdg/karsajobs:v1 .
+            echo $GITHUB_TOKEN | docker login ghcr.io -u username --password-stdin.io
+            sudo docker push ghcr.io/afrinaldipdg/karsajobs:v1
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint-dockerfile:
+          filters:
+            branches:
+              only:
+                - karsajobs
+      - test-app:
+          filters:
+            branches:
+              only:
+                - karsajobs
+      - build-app-karsajobs:
+          filters:
+            branches:
+              only:
+                - karsajobs
+
