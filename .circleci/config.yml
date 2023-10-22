@@ -31,7 +31,6 @@ jobs:
     steps:
       - checkout
        - setup_remote_docker:
-          version: 24.0.6
           docker_layer_caching: true # Ganti dengan versi Docker yang sesuai
       - run:
           name: Build and push Docker image
