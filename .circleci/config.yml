@@ -22,14 +22,13 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.14
-          docker_layer_caching: true
+          version: 24.0.6
       - run:
           name: Build and push Docker image for karsajobs-ui
           command: |
             # Build your karsajobs-ui application
-            sudo docker build -t ghcr.io/afrinaldipdg/karsajobs-uiv1 .
-            echo $GITHUB_TOKEN | sudo docker login ghcr.io --username afrinaldipdg --password-stdin
+            sudo docker build -t ghcr.io/afrinaldipdg/karsajobs-ui:v1 .
+            echo $GITHUB_TOKEN | sudo docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
             sudo docker push ghcr.io/afrinaldipdg/karsajobs-ui:v1
 workflows:
   version: 2
@@ -45,3 +44,4 @@ workflows:
             branches:
               only:
                 - karsajobs-ui
+
