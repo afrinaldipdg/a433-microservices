@@ -1,47 +1,53 @@
-version: 2.1
+version: 2.1  # Versi konfigurasi CircleCI yang digunakan
+
 jobs:
   lint-dockerfile:
     docker:
-      - image: circleci/golang:1.16-stretch-node-browsers-legacy
+      - image: circleci/golang:1.16-stretch-node-browsers-legacy  # Menggunakan image Docker untuk pekerjaan ini
     steps:
-      - checkout
+      - checkout  # Mengambil kode sumber proyek dari repositori
       - run:
           name: Install hadolint
           command: |
-            mkdir -p ~/bin
+            mkdir -p ~/bin  # Membuat direktori untuk menyimpan binary
             curl -Lo ~/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
-            chmod +x ~/bin/hadolint
-            sudo mv ~/bin/hadolint /usr/local/bin/hadolint
+            chmod +x ~/bin/hadolint  # Memberikan izin eksekusi ke hadolint
+            sudo mv ~/bin/hadolint /usr/local/bin/hadolint  # Memindahkan hadolint ke lokasi yang dapat diakses global
+
       - run:
           name: Run hadolint on Dockerfile
-          command: hadolint Dockerfile
+          command: hadolint Dockerfile  # Menjalankan hadolint untuk memeriksa Dockerfile
 
   build-app-karsajobs-ui:
     docker:
-      - image: circleci/golang:1.16-stretch-node-browsers-legacy
+      - image: circleci/golang:1.16-stretch-node-browsers-legacy  # Menggunakan image Docker untuk pekerjaan ini
     steps:
-      - checkout
+      - checkout  # Mengambil kode sumber proyek dari repositori
       - setup_remote_docker:
-          version: 24.0.6
+          docker_layer_caching: true  # Mengatur Docker Remote API dan mengaktifkan caching layer Docker
+
       - run:
           name: Build and push Docker image for karsajobs-ui
           command: |
-            # Build your karsajobs-ui application
-            sudo docker build -t ghcr.io/afrinaldipdg/karsajobs-ui:v1 .
-            echo $GITHUB_TOKEN | sudo docker login ghcr.io -u $GITHUB_USERNAME --password-stdin
-            sudo docker push ghcr.io/afrinaldipdg/karsajobs-ui:v1
+            # Membangun aplikasi karsajobs-ui Anda
+            sudo docker build -t ghcr.io/afrinaldipdg/karsajobs-uiv1 .  # Membangun Docker image
+            echo $GITHUB_TOKEN | sudo docker login ghcr.io -u $GITHUB_USERNAME --password-stdin  # Melakukan login ke registri Docker
+            sudo docker push ghcr.io/afrinaldipdg/karsajobs-ui:v1  # Mengunggah Docker image ke registri Docker
+
 workflows:
-  version: 2
+  version: 2  # Versi konfigurasi workflow
+
   build:
     jobs:
       - lint-dockerfile:
           filters:
             branches:
               only:
-                - karsajobs-ui
+                - karsajobs-ui  # Pekerjaan ini hanya dijalankan jika ada perubahan di cabang "karsajobs-ui"
+
       - build-app-karsajobs-ui:
           filters:
             branches:
               only:
-                - karsajobs-ui
+                - karsajobs-ui  # Pekerjaan ini hanya dijalankan jika ada perubahan di cabang "karsajobs-ui"
 
