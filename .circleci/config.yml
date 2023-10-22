@@ -1,0 +1,47 @@
+version: 2.1
+jobs:
+  lint-dockerfile:
+    docker:
+      - image: circleci/golang:1.16-stretch-node-browsers-legacy
+    steps:
+      - checkout
+      - run:
+          name: Install hadolint
+          command: |
+            mkdir -p ~/bin
+            curl -Lo ~/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+            chmod +x ~/bin/hadolint
+            sudo mv ~/bin/hadolint /usr/local/bin/hadolint
+      - run:
+          name: Run hadolint on Dockerfile
+          command: hadolint Dockerfile
+
+  build-app-karsajobs-ui:
+    docker:
+      - image: circleci/golang:1.16-stretch-node-browsers-legacy
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.14
+          docker_layer_caching: true
+      - run:
+          name: Build and push Docker image for karsajobs-ui
+          command: |
+            # Build your karsajobs-ui application
+            sudo docker build -t ghcr.io/afrinaldipdg/karsajobs-uiv1 .
+            echo $GITHUB_TOKEN | sudo docker login ghcr.io --username afrinaldipdg --password-stdin
+            sudo docker push ghcr.io/afrinaldipdg/karsajobs-ui:v1
+workflows:
+  version: 2
+  build:
+    jobs:
+      - lint-dockerfile:
+          filters:
+            branches:
+              only:
+                - karsajobs-ui
+      - build-app-karsajobs-ui:
+          filters:
+            branches:
+              only:
+                - karsajobs-ui
