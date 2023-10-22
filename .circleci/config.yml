@@ -31,14 +31,14 @@ jobs:
     steps:
       - checkout
        - setup_remote_docker:
-          version: 20.10.14
+          version: 24.0.6
           docker_layer_caching: true # Ganti dengan versi Docker yang sesuai
       - run:
           name: Build and push Docker image
           command: |
             # Build your Go application
             sudo docker build -t ghcr.io/afrinaldipdg/karsajobs:v1 .
-            echo $GITHUB_TOKEN | docker login ghcr.io -u username --password-stdin.io
+            echo $GITHUB_TOKEN | docker login ghcr.io -u $GITHUB_USERNAME --password-stdin.io
             sudo docker push ghcr.io/afrinaldipdg/karsajobs:v1
 
 workflows:
